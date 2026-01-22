@@ -45,11 +45,12 @@
           document.querySelectorAll('h1.tabset, h2.tabset, h3.tabset, h4.tabset, h5.tabset, h6.tabset').forEach(function(tabsetHeader) {
             const tabLevel = parseInt(tabsetHeader.tagName[1]);
             const childHeaderTag = 'H' + (tabLevel + 1);
-
+            
             // Find all child sections (tabs) - siblings until next same-level header
             const tabs = [];
+            const introContent = []; // Content before first tab
             let currentTab = null;
-
+            
             let sibling = tabsetHeader.nextElementSibling;
             while (sibling) {
               if (sibling.tagName === childHeaderTag) {
@@ -67,21 +68,24 @@
               } else if (currentTab) {
                 // Add content to current tab
                 currentTab.content.push(sibling);
+              } else {
+                // Content before first tab (intro text)
+                introContent.push(sibling);
               }
               sibling = sibling.nextElementSibling;
             }
             if (currentTab) tabs.push(currentTab);
-
+            
             if (tabs.length === 0) return;
-
+            
             // Create tab UI
             const tabContainer = document.createElement('div');
             tabContainer.className = 'tab-container';
-
+            
             // Create tab buttons
             const tabButtons = document.createElement('div');
             tabButtons.className = 'tab-buttons';
-
+            
             tabs.forEach(function(tab, index) {
               const button = document.createElement('button');
               button.className = 'tab-button' + (index === 0 ? ' active' : '');
@@ -97,9 +101,9 @@
               });
               tabButtons.appendChild(button);
             });
-
+            
             tabContainer.appendChild(tabButtons);
-
+            
             // Create tab panels and move content
             tabs.forEach(function(tab, index) {
               const panel = document.createElement('div');
@@ -112,9 +116,14 @@
               // Remove the original tab header
               tab.header.remove();
             });
-
-            // Insert tab container after tabset header
-            tabsetHeader.after(tabContainer);
+            
+            // Insert intro content right after tabset header, then tab container
+            let insertPoint = tabsetHeader;
+            introContent.forEach(function(el) {
+              insertPoint.after(el);
+              insertPoint = el;
+            });
+            insertPoint.after(tabContainer);
           });
         });
         </script>
