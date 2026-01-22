@@ -1,0 +1,147 @@
+<!doctype html>
+<html
+    xmlns="http://www.w3.org/1999/xhtml"
+    lang="$lang$"
+    xml:lang="$lang$"
+    $if(dir)$
+    dir="$dir$"
+    $endif$
+>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="generator" content="pandoc" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, user-scalable=yes"
+        />
+        $for(author-meta)$
+        <meta name="author" content="$author-meta$" />
+        $endfor$ $if(date-meta)$
+        <meta name="dcterms.date" content="$date-meta$" />
+        $endif$ $if(keywords)$
+        <meta
+            name="keywords"
+            content="$for(keywords)$$keywords$$sep$, $endfor$"
+        />
+        $endif$ $if(description-meta)$
+        <meta name="description" content="$description-meta$" />
+        $endif$
+        <title>$if(title-prefix)$$title-prefix$ – $endif$$pagetitle$</title>
+        <style>
+            $styles.html()$
+        </style>
+        $for(css)$
+        <link rel="stylesheet" href="$css$" />
+        $endfor$ $for(header-includes)$ $header-includes$ $endfor$
+        <script
+            data-external="1"
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"
+        ></script>
+        <script>
+        // Tabset functionality for pandoc-rendered markdown
+        // Emulates R Markdown's {.tabset} behavior
+        document.addEventListener('DOMContentLoaded', function() {
+          // Find all headers with 'tabset' class (pandoc applies class to header, not section)
+          document.querySelectorAll('h1.tabset, h2.tabset, h3.tabset, h4.tabset, h5.tabset, h6.tabset').forEach(function(tabsetHeader) {
+            const tabLevel = parseInt(tabsetHeader.tagName[1]);
+            const childHeaderTag = 'H' + (tabLevel + 1);
+
+            // Find all child sections (tabs) - siblings until next same-level header
+            const tabs = [];
+            let currentTab = null;
+
+            let sibling = tabsetHeader.nextElementSibling;
+            while (sibling) {
+              if (sibling.tagName === childHeaderTag) {
+                // New tab starts
+                if (currentTab) tabs.push(currentTab);
+                currentTab = {
+                  title: sibling.textContent,
+                  id: sibling.id || sibling.textContent.toLowerCase().replace(/\s+/g, '-'),
+                  header: sibling,
+                  content: []
+                };
+              } else if (sibling.tagName && sibling.tagName[0] === 'H' && parseInt(sibling.tagName[1]) <= tabLevel) {
+                // Hit a same-level or higher header, stop
+                break;
+              } else if (currentTab) {
+                // Add content to current tab
+                currentTab.content.push(sibling);
+              }
+              sibling = sibling.nextElementSibling;
+            }
+            if (currentTab) tabs.push(currentTab);
+
+            if (tabs.length === 0) return;
+
+            // Create tab UI
+            const tabContainer = document.createElement('div');
+            tabContainer.className = 'tab-container';
+
+            // Create tab buttons
+            const tabButtons = document.createElement('div');
+            tabButtons.className = 'tab-buttons';
+
+            tabs.forEach(function(tab, index) {
+              const button = document.createElement('button');
+              button.className = 'tab-button' + (index === 0 ? ' active' : '');
+              button.textContent = tab.title;
+              button.setAttribute('data-tab', tab.id);
+              button.addEventListener('click', function() {
+                // Deactivate all tabs in this container
+                tabContainer.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                tabContainer.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+                // Activate clicked tab
+                button.classList.add('active');
+                tabContainer.querySelector('.tab-panel[data-tab="' + tab.id + '"]').classList.add('active');
+              });
+              tabButtons.appendChild(button);
+            });
+
+            tabContainer.appendChild(tabButtons);
+
+            // Create tab panels and move content
+            tabs.forEach(function(tab, index) {
+              const panel = document.createElement('div');
+              panel.className = 'tab-panel' + (index === 0 ? ' active' : '');
+              panel.setAttribute('data-tab', tab.id);
+              tab.content.forEach(function(el) {
+                panel.appendChild(el);
+              });
+              tabContainer.appendChild(panel);
+              // Remove the original tab header
+              tab.header.remove();
+            });
+
+            // Insert tab container after tabset header
+            tabsetHeader.after(tabContainer);
+          });
+        });
+        </script>
+    </head>
+    <body>
+        $for(include-before)$ $include-before$ $endfor$ $if(title)$
+        <header id="title-block-header">
+            <div class="left">
+                <h1 class="title">$title$</h1>
+                $if(subtitle)$
+                <p class="subtitle">$subtitle$</p>
+                $endif$
+            </div>
+            <div class="right">
+                $for(author)$
+                <p class="author">$author$</p>
+                $endfor$ $if(date)$
+                <p class="date">$date$</p>
+                $endif$
+            </div>
+        </header>
+        $endif$ $if(toc)$
+        <nav id="$idprefix$TOC" role="doc-toc">
+            $if(toc-title)$
+            <h2 id="$idprefix$toc-title">$toc-title$</h2>
+            $endif$ $table-of-contents$
+        </nav>
+        $endif$ $body$ $for(include-after)$ $include-after$ $endfor$
+    </body>
+</html>
