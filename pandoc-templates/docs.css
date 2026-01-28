@@ -1248,3 +1248,50 @@ details[open] summary::after {
 .tab-panel.active {
   display: block;
 }
+
+/* Container for the whole "conversation" */
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin: 20px 0;
+}
+
+/* Base style for bubbles */
+.message {
+  max-width: 80%;
+  padding: 15px;
+  border-radius: 4px;
+  position: relative;
+}
+
+/* Executor: Left side, subtle gray/blue */
+.executor {
+  align-self: flex-start;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+}
+
+/* Target: Right side, subtle green/darker */
+.target {
+  align-self: flex-end;
+  background-color: #f4f8fb;
+  border: 1px solid #c5d5e5;
+}
+
+/* Make sure code blocks inside don't break the bubble */
+.message pre {
+  margin: 10px 0 0 0;
+  background: #ffffff !important;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+/* Label Styling */
+.message strong {
+  display: block;
+  font-family: monospace;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  color: #666;
+}
