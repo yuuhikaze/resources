@@ -20,8 +20,8 @@ pkgs.mkShell {
     ln -sf ${resources-root}/pandoc-templates/docs.css "$DOCS_DIR/pandoc-templates"
 
     # Export convenience environment variables
-    export PANDOC_DOCS_HTML="$DOCS_DIR/pandoc-templates/docs.html"
-    export PANDOC_DOCS_CSS="$DOCS_DIR/pandoc-templates/docs.css"
+    export PANDOC_DOCS_HTML="pandoc-templates/docs.html"
+    export PANDOC_DOCS_CSS="pandoc-templates/docs.css"
 
     # Print information
     echo "====== Documentation Environment ======"
