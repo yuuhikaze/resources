@@ -12,7 +12,7 @@
         tern-core = tern-src.packages.${system}.tern-core;
       in {
         # Export docs devshell for external use
-        devShells.tern-pandoc = import ./devshells/docs.nix {
+        devShells.docs = import ./devshells/docs.nix {
           inherit pkgs tern-core;
           resources-root = self;
         };
