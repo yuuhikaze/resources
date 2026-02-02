@@ -45,12 +45,12 @@
           document.querySelectorAll('h1.tabset, h2.tabset, h3.tabset, h4.tabset, h5.tabset, h6.tabset').forEach(function(tabsetHeader) {
             const tabLevel = parseInt(tabsetHeader.tagName[1]);
             const childHeaderTag = 'H' + (tabLevel + 1);
-            
+
             // Find all child sections (tabs) - siblings until next same-level header
             const tabs = [];
             const introContent = []; // Content before first tab
             let currentTab = null;
-            
+
             let sibling = tabsetHeader.nextElementSibling;
             while (sibling) {
               if (sibling.tagName === childHeaderTag) {
@@ -75,17 +75,17 @@
               sibling = sibling.nextElementSibling;
             }
             if (currentTab) tabs.push(currentTab);
-            
+
             if (tabs.length === 0) return;
-            
+
             // Create tab UI
             const tabContainer = document.createElement('div');
             tabContainer.className = 'tab-container';
-            
+
             // Create tab buttons
             const tabButtons = document.createElement('div');
             tabButtons.className = 'tab-buttons';
-            
+
             tabs.forEach(function(tab, index) {
               const button = document.createElement('button');
               button.className = 'tab-button' + (index === 0 ? ' active' : '');
@@ -101,9 +101,9 @@
               });
               tabButtons.appendChild(button);
             });
-            
+
             tabContainer.appendChild(tabButtons);
-            
+
             // Create tab panels and move content
             tabs.forEach(function(tab, index) {
               const panel = document.createElement('div');
@@ -116,7 +116,7 @@
               // Remove the original tab header
               tab.header.remove();
             });
-            
+
             // Insert intro content right after tabset header, then tab container
             let insertPoint = tabsetHeader;
             introContent.forEach(function(el) {
@@ -124,6 +124,151 @@
               insertPoint = el;
             });
             insertPoint.after(tabContainer);
+          });
+
+          // Image Maximizer functionality
+          // Wraps images and SVGs in containers with expand functionality
+          const wrapElement = function(element) {
+            // Skip if already wrapped
+            if (element.parentElement && element.parentElement.classList.contains('img-wrapper')) return;
+
+            // Get element dimensions
+            const getWidth = function() {
+              if (element.tagName === 'IMG') {
+                return element.naturalWidth || element.width || element.clientWidth;
+              } else if (element.tagName === 'SVG') {
+                // For inline SVGs, try multiple methods to get width
+                // 1. Check viewBox attribute for intended dimensions
+                const viewBox = element.getAttribute('viewBox');
+                if (viewBox) {
+                  const parts = viewBox.split(/\s+|,/);
+                  if (parts.length >= 4) {
+                    const vbWidth = parseFloat(parts[2]);
+                    if (vbWidth > 0) return vbWidth;
+                  }
+                }
+                // 2. Check explicit width attribute
+                const widthAttr = element.getAttribute('width');
+                if (widthAttr && !widthAttr.includes('%')) {
+                  const w = parseFloat(widthAttr);
+                  if (w > 0) return w;
+                }
+                // 3. Try getBBox (may throw if SVG not rendered)
+                try {
+                  const bbox = element.getBBox ? element.getBBox() : null;
+                  if (bbox && bbox.width > 0) return bbox.width;
+                } catch (e) {
+                  // getBBox can throw if element is not in DOM or not rendered
+                }
+                // 4. Fall back to client dimensions
+                return element.clientWidth || element.getBoundingClientRect().width;
+              }
+              return 0;
+            };
+
+            // Only apply to images/SVGs wider than 200px (skip small icons)
+            const width = getWidth();
+            if (width < 200) return;
+
+            // Handle parent element - <div> inside <p> is invalid HTML and breaks rendering
+            const parent = element.parentNode;
+            if (parent && parent.tagName === 'P') {
+              // Replace <p> with <figure> to allow block-level content
+              const figure = document.createElement('figure');
+              figure.className = 'img-figure';
+              // Move all children from <p> to <figure>
+              while (parent.firstChild) {
+                figure.appendChild(parent.firstChild);
+              }
+              parent.parentNode.replaceChild(figure, parent);
+            }
+
+            // Create wrapper
+            const wrapper = document.createElement('div');
+            wrapper.className = 'img-wrapper';
+
+            // Create expand icon
+            const expandIcon = document.createElement('div');
+            expandIcon.className = 'img-expand-icon';
+            expandIcon.innerHTML = '⤢'; // Expand arrow symbol
+            expandIcon.setAttribute('title', 'Click to expand');
+
+            // Wrap element and add icon
+            element.parentNode.insertBefore(wrapper, element);
+            wrapper.appendChild(element);
+            wrapper.appendChild(expandIcon);
+
+            // Add click handler to maximize
+            const maximize = function() {
+              // Prevent body scroll
+              document.body.style.overflow = 'hidden';
+
+              // Create overlay
+              const overlay = document.createElement('div');
+              overlay.className = 'img-maximized-overlay';
+
+              // Create content container
+              const content = document.createElement('div');
+              content.className = 'img-maximized-content';
+
+              // Clone element
+              const maximizedElement = element.cloneNode(true);
+              maximizedElement.className = 'img-maximized';
+
+              // Create close button
+              const closeBtn = document.createElement('button');
+              closeBtn.className = 'img-close-btn';
+              closeBtn.innerHTML = '×';
+              closeBtn.setAttribute('title', 'Close (ESC)');
+
+              // Assemble
+              content.appendChild(maximizedElement);
+              content.appendChild(closeBtn);
+              overlay.appendChild(content);
+              document.body.appendChild(overlay);
+
+              // Trigger animation
+              setTimeout(function() {
+                overlay.classList.add('active');
+              }, 10);
+
+              // Close handlers
+              const close = function() {
+                overlay.classList.remove('active');
+                setTimeout(function() {
+                  overlay.remove();
+                  document.body.style.overflow = '';
+                }, 200); // Match CSS transition time
+              };
+
+              closeBtn.addEventListener('click', close);
+              overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) close();
+              });
+              document.addEventListener('keydown', function escHandler(e) {
+                if (e.key === 'Escape') {
+                  close();
+                  document.removeEventListener('keydown', escHandler);
+                }
+              });
+            };
+
+            element.addEventListener('click', maximize);
+            expandIcon.addEventListener('click', maximize);
+          };
+
+          // Process inline SVGs immediately
+          document.querySelectorAll('svg').forEach(wrapElement);
+
+          // Process images - wait for load to get accurate dimensions
+          document.querySelectorAll('img').forEach(function(img) {
+            if (img.complete) {
+              wrapElement(img);
+            } else {
+              img.addEventListener('load', function() {
+                wrapElement(img);
+              });
+            }
           });
         });
         </script>

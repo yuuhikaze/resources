@@ -1295,3 +1295,151 @@ details[open] summary::after {
   margin-bottom: 10px;
   color: #666;
 }
+
+/* ========================================================================
+   Image Maximizer
+   ======================================================================== */
+
+/* Figure container for images (replaces <p> when wrapping images) */
+.img-figure {
+  margin: 1em 0;
+}
+
+/* Wrapper for images with expand functionality */
+.img-wrapper {
+  position: relative;
+  display: block;
+  max-width: 100%;
+  cursor: zoom-in;
+}
+
+.img-wrapper img,
+.img-wrapper svg {
+  display: block;
+  max-width: 100%;
+  width: auto;
+  height: auto;
+}
+
+/* SVG display rules - ensure SVGs render properly in various contexts */
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Block display for standalone SVGs */
+body > svg,
+p > svg,
+div > svg:only-child,
+details > svg,
+details svg:not(.img-wrapper svg) {
+  display: block;
+}
+
+/* Expand icon that appears on hover */
+.img-expand-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  line-height: 1;
+  color: #666;
+  opacity: 0;
+  transition: opacity 0.2s;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.img-wrapper:hover .img-expand-icon {
+  opacity: 1;
+}
+
+/* Maximized overlay (full-screen backdrop) */
+.img-maximized-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0);
+  backdrop-filter: blur(0px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.2s, background-color 0.2s, backdrop-filter 0.2s;
+  cursor: zoom-out;
+}
+
+.img-maximized-overlay.active {
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(5px);
+}
+
+/* Content container for maximized image */
+.img-maximized-content {
+  position: relative;
+  max-width: 95vw;
+  max-height: 95vh;
+  padding: 20px;
+  transform: scale(0.9);
+  transition: transform 0.2s;
+}
+
+.img-maximized-overlay.active .img-maximized-content {
+  transform: scale(1);
+}
+
+/* The maximized image itself */
+.img-maximized {
+  max-width: 100%;
+  max-height: 90vh;
+  width: auto;
+  height: auto;
+  display: block;
+  border-radius: 3px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  cursor: default;
+}
+
+/* Close button (X) in top-right */
+.img-close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: rgba(255, 255, 255, 0.95);
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  width: 36px;
+  height: 36px;
+  font-size: 24px;
+  line-height: 1;
+  color: #666;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.img-close-btn:hover {
+  background-color: #f4f4f4;
+  color: #333;
+  border-color: #ccc;
+}
+
+.img-close-btn:active {
+  background-color: #e8e8e8;
+}

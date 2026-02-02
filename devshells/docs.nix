@@ -25,7 +25,7 @@ pkgs.mkShell {
     ln -sf "$ROOT_DIR/docs-src/resources" "$ROOT_DIR/docs"
 
     # Export convenience environment variables
-    export PANDOC_DOCS_HTML="/pandoc-templates/docs.html"
+    export PANDOC_DOCS_HTML="$DOCS_DIR/pandoc-templates/docs.html"
     export PANDOC_DOCS_CSS="/pandoc-templates/docs.css"
 
     # Print information
