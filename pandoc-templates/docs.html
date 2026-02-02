@@ -214,6 +214,41 @@
               // Clone element
               const maximizedElement = element.cloneNode(true);
               maximizedElement.className = 'img-maximized';
+              
+              // For images (including SVG files loaded via <img>), ensure proper sizing
+              if (element.tagName === 'IMG') {
+                const natWidth = element.naturalWidth || element.clientWidth;
+                const natHeight = element.naturalHeight || element.clientHeight;
+                const isSvg = element.src && element.src.toLowerCase().endsWith('.svg');
+                
+                if (natWidth && natHeight) {
+                  const maxW = window.innerWidth * 0.9;
+                  const maxH = window.innerHeight * 0.9;
+                  const aspectRatio = natWidth / natHeight;
+                  
+                  // For SVGs, scale up to fill viewport (they're vector, no quality loss)
+                  // For raster images, don't scale beyond natural size
+                  let targetW, targetH;
+                  if (isSvg) {
+                    // Scale to fit viewport while maintaining aspect ratio
+                    if (maxW / aspectRatio <= maxH) {
+                      targetW = maxW;
+                      targetH = maxW / aspectRatio;
+                    } else {
+                      targetH = maxH;
+                      targetW = maxH * aspectRatio;
+                    }
+                  } else {
+                    // For raster images, don't exceed natural dimensions
+                    const ratio = Math.min(maxW / natWidth, maxH / natHeight, 1);
+                    targetW = natWidth * ratio;
+                    targetH = natHeight * ratio;
+                  }
+                  
+                  maximizedElement.style.width = Math.round(targetW) + 'px';
+                  maximizedElement.style.height = Math.round(targetH) + 'px';
+                }
+              }
 
               // Create close button
               const closeBtn = document.createElement('button');
