@@ -3,7 +3,7 @@
 pkgs.mkShell {
   name = "tern+pandoc_resources-shell";
 
-  buildInputs = [ pkgs.pandoc tern-core ];
+  buildInputs = [ pkgs.pandoc pkgs.structurizr-cli pkgs.plantuml tern-core ];
 
   shellHook = ''
     # Set up Tern converter
